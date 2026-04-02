@@ -2,6 +2,11 @@ import { extension_settings, getContext } from '../../../../scripts/extensions.j
 import { saveSettingsDebounced } from '../../../../script.js';
 import { event_types, eventSource } from '../../../../scripts/events.js';
 
+
+// Keep track of where your extension is located, name should match repo name
+const extensionName = "persona-expressions";
+const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
+const extensionSettings = extension_settings[extensionName];
 /**
  * Person Expression Extension
  * Displays persona expressions based on classification data
@@ -31,7 +36,7 @@ let autoHideTimeout = null;
  * Load settings from extension_settings
  */
 function loadSettings() {
-    const loadedSettings = extension_settings.personExpression || {};
+    const loadedSettings = extensionSettings || {};
     currentSettings = { ...defaultSettings, ...loadedSettings };
     console.log('[Person Expression] Settings loaded:', currentSettings);
 }
@@ -40,7 +45,7 @@ function loadSettings() {
  * Save settings to extension_settings
  */
 function saveSettings() {
-    extension_settings.personExpression = { ...currentSettings };
+    extensionSettings = { ...currentSettings };
     saveSettingsDebounced();
     console.log('[Person Expression] Settings saved:', currentSettings);
 }
@@ -71,7 +76,7 @@ function getSetting(key) {
  */
 async function loadClassification(filename) {
     try {
-        const response = await fetch(`/scripts/extensions/PersonExpression/${filename}`);
+        const response = await fetch(`${extensionFolderPath}/${filename}`);
         if (response.ok) {
             expressionData = await response.json();
             console.log('[Person Expression] Classification data loaded:', expressionData);
@@ -364,7 +369,7 @@ function onSettingsChange() {
  * Add settings UI to the page
  */
 async function addSettingsUI() {
-    const settingsHTML = await fetch('/scripts/extensions/PersonExpression/settings.html')
+    const settingsHTML = await fetch(`${extensionFolderPath}/settings.html`)
         .then(response => response.text());
     
     const settingsContainer = document.getElementById('extensions_settings');
