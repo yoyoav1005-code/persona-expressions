@@ -14,6 +14,23 @@ import { user_avatar } from '../../../../scripts/personas.js';
 
 export { MODULE_NAME };
 
+// ============================================
+// DEBUGGING CONFIGURATION
+// ============================================
+const DEBUG = true; // Set to false in production
+
+function debug(...args) {
+    if (DEBUG) console.log('[Persona Expressions]', ...args);
+}
+
+function debugError(...args) {
+    if (DEBUG) console.error('[Persona Expressions]', ...args);
+}
+
+function debugWarn(...args) {
+    if (DEBUG) console.warn('[Persona Expressions]', ...args);
+}
+
 const MODULE_NAME = 'third-party/persona-expressions';
 const EXTENSION_KEY = 'persona-expressions';
 const EXTENSION_FOLDER = `scripts/extensions/${MODULE_NAME}`;
@@ -119,29 +136,44 @@ async function moduleWorker({ newChat = false } = {}) {
     const avatarId = getCurrentAvatarId();
     const spriteFolderName = getPersonaSpriteFolderName();
 
+    debug('moduleWorker running', { 
+        newChat, 
+        avatarId, 
+        spriteFolderName, 
+        hasCache: Object.keys(spriteCache).length > 0,
+        spriteCacheKeys: Object.keys(spriteCache),
+        lastUserMessage: lastUserMessage?.substring(0, 50),
+        enabled: settings.enabled
+    });
+
     if (!settings.enabled) {
+        debug('Settings disabled, removing expression');
         removeExpression();
         return;
     }
 
     if (!avatarId || avatarId.includes('user-default')) {
+        debug('Invalid avatar ID, removing expression', { avatarId });
         removeExpression();
         return;
     }
 
     // persona/avatar has no expressions or it is not loaded
     if (Object.keys(spriteCache).length === 0) {
+        debug('No cache found, validating images', { spriteFolderName });
         await validateImages(spriteFolderName);
         lastAvatarId = avatarId;
     }
 
     const offlineMode = $('.persona_expression_settings .offline_mode');
     if (!modules.includes('classify') && settings.api === EXPRESSION_API.extras) {
+        debug('Offline mode - classify module not available', { api: settings.api });
         offlineMode.css('display', 'block');
         lastAvatarId = avatarId;
         return;
     } else {
         if (offlineMode.is(':visible')) {
+            debug('Refreshing expressions and cache');
             expressionsList = null;
             spriteCache = {};
             expressionsList = await getExpressionsList();
@@ -157,15 +189,23 @@ async function moduleWorker({ newChat = false } = {}) {
     const messageChanged = !((lastAvatarId === avatarId) && lastUserMessage === currentLastMessage);
 
     if (!messageChanged) {
+        debug('No changes detected, skipping worker');
         return;
     }
 
+    debug('Changes detected, processing', { 
+        avatarChanged: lastAvatarId !== avatarId,
+        messageChanged: lastUserMessage !== currentLastMessage,
+        currentLastMessage: currentLastMessage?.substring(0, 50)
+    });
+
     if (context.streamingProcessor && !context.streamingProcessor.isFinished && settings.api === EXPRESSION_API.llm) {
+        debug('LLM streaming in progress, skipping');
         return;
     }
 
     if (inApiCall) {
-        console.debug('Classification API is busy');
+        debug('Classification API is busy, skipping');
         return;
     }
 
@@ -173,17 +213,21 @@ async function moduleWorker({ newChat = false } = {}) {
         const now = Date.now();
         const timeSinceLastResponse = now - lastServerResponseTime;
         if (timeSinceLastResponse < STREAMING_UPDATE_INTERVAL) {
-            console.log('Streaming in progress: throttling expression update.');
+            debug('Streaming in progress, throttling expression update', { timeSinceLastResponse });
             return;
         }
     }
 
     try {
         inApiCall = true;
+        debug('Getting expression label for message', { currentLastMessage: currentLastMessage?.substring(0, 50) });
         const expression = await getExpressionLabel(currentLastMessage || '');
+        debug('Expression label obtained', { expression });
 
+        debug('Setting expression', { spriteFolderName, expression });
         await sendExpressionCall(spriteFolderName, expression, { force: false });
     } catch (error) {
+        debugError('Error in moduleWorker', error);
         console.log(error);
     } finally {
         inApiCall = false;
@@ -292,22 +336,34 @@ export async function sendExpressionCall(spriteFolderName, expression, { force =
 }
 
 async function setExpression(spriteFolderName, expression, { force = false, overrideSpriteFile = null } = {}) {
+    debug('setExpression called', { spriteFolderName, expression, force, overrideSpriteFile });
     const settings = getSettings();
     await validateImages(spriteFolderName);
+    
     const img = $('img.persona_expression');
+    debug('Found image element', { imgExists: !!img, imgSrc: img.attr('src'), imgExpression: img.attr('data-expression') });
+    
     const prevExpressionSrc = img.attr('src');
     const prevExpression = img.attr('data-expression');
     const expressionClone = img.clone();
 
     // Don't reset sprite if same expression is already set (unless force)
     if (!force && prevExpression === expression && prevExpressionSrc) {
+        debug('Expression already set, skipping update', { expression, prevExpressionSrc });
         document.getElementById('persona_expression-holder').style.display = '';
         return;
     }
 
+    debug('Choosing sprite for expression');
     const spriteFile = chooseSpriteForExpression(spriteFolderName, expression, { prevExpressionSrc, overrideSpriteFile });
+    debug('Sprite file result', { spriteFound: !!spriteFile, spriteFile: spriteFile?.fileName, spriteFileSrc: spriteFile?.imageSrc });
+
     if (spriteFile) {
+        debug('Sprite found, checking if animation needed', { prevExpressionSrc, newSrc: spriteFile.imageSrc, isAnimating: img.hasClass('persona_expression-animating') });
+        
         if (prevExpressionSrc !== spriteFile.imageSrc && !img.hasClass('persona_expression-animating')) {
+            debug('Starting sprite animation', { spriteSrc: spriteFile.imageSrc, fileName: spriteFile.fileName, expression: spriteFile.expression });
+            
             expressionClone.addClass('persona_expression-clone');
             expressionClone.attr('id', '').css({ opacity: 0 });
             expressionClone.attr('src', spriteFile.imageSrc);
@@ -329,6 +385,7 @@ async function setExpression(spriteFolderName, expression, { force = false, over
             img.css('position', 'absolute').width(imgWidth).height(imgHeight);
             expressionClone.addClass('persona_expression-animating');
             expressionClone.css({ opacity: 0 }).animate({ opacity: 1 }, duration).promise().done(function () {
+                debug('Animation complete, cleaning up');
                 img.animate({ opacity: 0 }, duration);
                 img.remove();
                 expressionClone.attr('id', 'persona_expression-image');
@@ -341,23 +398,36 @@ async function setExpression(spriteFolderName, expression, { force = false, over
             expressionClone.removeClass('default');
             expressionClone.off('error');
             expressionClone.on('error', function () {
+                debugError('Image failed to load', { src: $(this).attr('src') });
                 $(this).attr('src', '');
                 $(this).off('error');
             });
         }
         console.info('Persona expression set', { expression: spriteFile.expression, file: spriteFile.fileName });
     } else {
+        debug('No sprite found, checking if we should update with fallback', { hasPrevSrc: !!prevExpressionSrc, force });
+        
         // Only update if there's no existing sprite or force is set
         if (!prevExpressionSrc || force) {
+            debug('Updating with fallback/none');
             img.attr('data-sprite-folder-name', spriteFolderName);
             if (settings.showDefault && expression !== RESET_SPRITE_LABEL) {
+                debug('Setting default emoji', { emoji: expression });
                 setDefaultEmojiForImage(img, expression);
             } else {
+                debug('Setting none (empty src)');
                 setNoneForImage(img, expression);
             }
+        } else {
+            debug('Not updating, skipping');
         }
     }
-    document.getElementById('persona_expression-holder').style.display = '';
+    
+    const holder = document.getElementById('persona_expression-holder');
+    debug('Setting holder display to visible', { holderExists: !!holder });
+    if (holder) {
+        holder.style.display = '';
+    }
 }
 
 function setDefaultEmojiForImage(img, expression) {
@@ -378,48 +448,81 @@ function setNoneForImage(img, expression) {
 }
 
 function chooseSpriteForExpression(spriteFolderName, expression, { prevExpressionSrc = null, overrideSpriteFile = null } = {}) {
+    debug('chooseSpriteForExpression called', { spriteFolderName, expression, overrideSpriteFile, prevExpressionSrc });
     const settings = getSettings();
-    if (!spriteCache[spriteFolderName]) return null;
-    if (expression === RESET_SPRITE_LABEL) return null;
+    if (!spriteCache[spriteFolderName]) {
+        debug('No cache found for spriteFolderName', { spriteFolderName });
+        return null;
+    }
+    if (expression === RESET_SPRITE_LABEL) {
+        debug('Reset sprite requested');
+        return null;
+    }
 
     let sprite = spriteCache[spriteFolderName].find(x => x.label === expression);
+    debug('Finding sprite for expression', { expression, spriteFound: !!sprite, cacheLabels: spriteCache[spriteFolderName].map(x => x.label) });
+    
     if (!(sprite?.files.length > 0) && settings.fallback_expression) {
+        debug('Primary sprite not found, trying fallback', { fallback: settings.fallback_expression });
         sprite = spriteCache[spriteFolderName].find(x => x.label === settings.fallback_expression);
+        debug('Fallback sprite found', { fallbackFound: !!sprite });
     }
-    if (!(sprite?.files.length > 0)) return null;
+    if (!(sprite?.files.length > 0)) {
+        debug('No sprite found for expression or fallback', { expression, fallback: settings.fallback_expression });
+        return null;
+    }
 
     let spriteFile = sprite.files[0];
 
     if (overrideSpriteFile) {
+        debug('Override sprite file specified', { overrideSpriteFile });
         const searched = sprite.files.find(x => x.fileName === overrideSpriteFile);
-        if (searched) spriteFile = searched;
+        if (searched) {
+            spriteFile = searched;
+            debug('Override sprite found', { spriteFile: spriteFile.fileName });
+        } else {
+            debug('Override sprite not found in files', { overrideSpriteFile, availableFiles: sprite.files.map(x => x.fileName) });
+        }
     } else if (settings.allowMultiple && sprite.files.length > 1) {
+        debug('Multiple sprites available, choosing randomly', { totalFiles: sprite.files.length, rerollIfSame: settings.rerollIfSame });
         let possibleFiles = sprite.files;
         if (settings.rerollIfSame) {
+            debug('Filtering out previous sprite', { prevExpressionSrc });
             possibleFiles = possibleFiles.filter(x => !prevExpressionSrc || x.imageSrc !== prevExpressionSrc);
+            debug('Possible files after filtering', { count: possibleFiles.length, files: possibleFiles.map(x => x.fileName) });
         }
         spriteFile = possibleFiles[Math.floor(Math.random() * possibleFiles.length)];
+        debug('Random sprite selected', { selectedFile: spriteFile.fileName });
     }
+
+    debug('Sprite selection complete', { spriteFile: spriteFile?.fileName, spriteFileExpression: spriteFile?.expression });
     return spriteFile;
 }
 
 async function validateImages(spriteFolderName, forceRedrawCached = false) {
+    debug('validateImages called', { spriteFolderName, forceRedrawCached, hasCache: !!spriteCache[spriteFolderName], cacheKeys: Object.keys(spriteCache) });
     const labels = await getExpressionsList();
 
     if (spriteCache[spriteFolderName]) {
+        debug('Cache found for spriteFolderName', { spriteFolderName, cacheCount: spriteCache[spriteFolderName].length });
         if (forceRedrawCached && $('#persona_image_list').data('name') !== spriteFolderName) {
+            debug('Forced redraw requested');
             await drawSpritesList(spriteFolderName, labels, spriteCache[spriteFolderName]);
         }
         return;
     }
 
     if (!spriteFolderName) {
+        debug('No sprite folder name provided, drawing empty list');
         await drawSpritesList('', labels, []);
         return;
     }
 
+    debug('Cache not found, fetching sprites from API', { spriteFolderName });
     const sprites = await getSpritesList(spriteFolderName);
+    debug('Sprites fetched', { spriteFolderName, spritesCount: sprites.length });
     spriteCache[spriteFolderName] = await drawSpritesList(spriteFolderName, labels, sprites);
+    debug('Cache populated', { spriteFolderName, cacheCount: spriteCache[spriteFolderName].length });
 }
 
 async function drawSpritesList(spriteFolderName, labels, sprites) {
@@ -479,9 +582,12 @@ function renderTemplate(templateString, data) {
 }
 
 async function getSpritesList(name) {
+    debug('getSpritesList called', { name });
     try {
         const result = await fetch(`/api/sprites/get?name=${encodeURIComponent(name)}`);
+        debug('API response received', { name, status: result.status, ok: result.ok });
         let sprites = result.ok ? (await result.json()) : [];
+        debug('Sprites parsed', { name, spritesCount: sprites.length });
 
         const grouped = sprites.reduce((acc, sprite) => {
             const imageData = getExpressionImageData(sprite);
@@ -494,6 +600,8 @@ async function getSpritesList(name) {
             return acc;
         }, []);
 
+        debug('Sprites grouped by expression', { name, groupedCount: grouped.length });
+
         for (const expression of grouped) {
             expression.files.sort((a, b) => {
                 if (a.title === expression.label) return -1;
@@ -504,8 +612,10 @@ async function getSpritesList(name) {
                 expression.files[i].type = 'additional';
             }
         }
+        debug('getSpritesList complete', { name, totalFiles: grouped.reduce((acc, exp) => acc + exp.files.length, 0) });
         return grouped;
     } catch (err) {
+        debugError('Error in getSpritesList', err);
         console.log(err);
         return [];
     }
