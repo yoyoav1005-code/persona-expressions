@@ -1,0 +1,76 @@
+<div id="person_expression_settings" class="inline_drawer">
+    <details open>
+        <summary data-i18n="Person Expression">Person Expression</summary>
+        <div class="settings_block">
+            <div class="settings_row">
+                <div class="settings_label">
+                    <label for="person_expression_enabled" data-i18n="Enable Person Expression">Enable Person Expression</label>
+                </div>
+                <div class="settings_input">
+                    <input type="checkbox" id="person_expression_enabled">
+                </div>
+            </div>
+            <div class="settings_row">
+                <div class="settings_label">
+                    <label for="person_expression_position" data-i18n="Position">Position</label>
+                </div>
+                <div class="settings_input">
+                    <select id="person_expression_position">
+                        <option value="top-left" data-i18n="Top Left">Top Left</option>
+                        <option value="top-right" data-i18n="Top Right">Top Right</option>
+                        <option value="bottom-left" data-i18n="Bottom Left">Bottom Left</option>
+                        <option value="bottom-right" data-i18n="Bottom Right">Bottom Right</option>
+                    </select>
+                </div>
+            </div>
+            <div class="settings_row">
+                <div class="settings_label">
+                    <label for="person_expression_autohide" data-i18n="Auto Hide">Auto Hide</label>
+                </div>
+                <div class="settings_input">
+                    <input type="checkbox" id="person_expression_autohide">
+                </div>
+            </div>
+            <div class="settings_row">
+                <div class="settings_label">
+                    <label for="person_expression_delay" data-i18n="Auto Hide Delay (ms)">Auto Hide Delay (ms)</label>
+                </div>
+                <div class="settings_input">
+                    <input type="number" id="person_expression_delay" value="3000" min="0" step="100">
+                </div>
+            </div>
+            <div class="settings_row">
+                <div class="settings_label">
+                    <label for="person_expression_width" data-i18n="Width (px)">Width (px)</label>
+                </div>
+                <div class="settings_input">
+                    <input type="number" id="person_expression_width" value="200" min="50" max="500" step="10">
+                </div>
+            </div>
+            <div class="settings_row">
+                <div class="settings_label">
+                    <label for="person_expression_height" data-i18n="Height (px)">Height (px)</label>
+                </div>
+                <div class="settings_input">
+                    <input type="number" id="person_expression_height" value="200" min="50" max="500" step="10">
+                </div>
+            </div>
+            <div class="settings_row">
+                <div class="settings_label">
+                    <label for="person_expression_classification_file" data-i18n="Classification File">Classification File</label>
+                </div>
+                <div class="settings_input">
+                    <input type="text" id="person_expression_classification_file" value="person-expressions.json" placeholder="person-expressions.json">
+                </div>
+            </div>
+            <div class="settings_row">
+                <div class="settings_label">
+                    <label for="person_expression_show_label" data-i18n="Show Label">Show Label</label>
+                </div>
+                <div class="settings_input">
+                    <input type="checkbox" id="person_expression_show_label">
+                </div>
+            </div>
+        </div>
+    </details>
+</div>

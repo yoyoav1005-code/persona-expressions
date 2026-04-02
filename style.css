@@ -1,0 +1,55 @@
+/* Person Expression Extension Styles */
+
+#person_expression_panel {
+    position: fixed;
+    z-index: 10000;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+#person_expression_panel.hidden {
+    opacity: 0;
+}
+
+#person_expression_image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#person_expression_label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    font-size: 12px;
+    text-align: center;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    pointer-events: auto;
+}
+
+.person_expression_position-top-left {
+    top: 20px;
+    left: 20px;
+}
+
+.person_expression_position-top-right {
+    top: 20px;
+    right: 20px;
+}
+
+.person_expression_position-bottom-left {
+    bottom: 20px;
+    left: 20px;
+}
+
+.person_expression_position-bottom-right {
+    bottom: 20px;
+    right: 20px;
+}
