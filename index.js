@@ -1,6 +1,6 @@
-import { extension_settings, getContext } from '../../../scripts/extensions.js';
-import { saveSettingsDebounced } from '../../../script.js';
-import { event_types, eventSource } from '../../../scripts/events.js';
+import { extension_settings, getContext } from '../../../../scripts/extensions.js';
+import { saveSettingsDebounced } from '../../../../script.js';
+import { event_types, eventSource } from '../../../../scripts/events.js';
 
 /**
  * Person Expression Extension
