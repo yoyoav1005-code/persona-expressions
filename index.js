@@ -17,7 +17,7 @@ export { MODULE_NAME };
 // ============================================
 // DEBUGGING CONFIGURATION
 // ============================================
-const DEBUG = true; // Set to false in production
+const DEBUG = false; // Set to false in production
 
 function debug(...args) {
     if (DEBUG) console.log('[Persona Expressions]', ...args);
@@ -143,11 +143,12 @@ async function moduleWorker({ newChat = false } = {}) {
         hasCache: Object.keys(spriteCache).length > 0,
         spriteCacheKeys: Object.keys(spriteCache),
         lastUserMessage: lastUserMessage?.substring(0, 50),
-        enabled: settings.enabled
+        enabled: settings.enabled,
+        hasSettings: !!extension_settings[EXTENSION_KEY]
     });
 
     if (!settings.enabled) {
-        debug('Settings disabled, removing expression');
+        debug('Extension is disabled, removing expression');
         removeExpression();
         return;
     }
@@ -834,16 +835,21 @@ function migrateSettings() {
         extension_settings[EXTENSION_KEY] = {};
     }
     const settings = extension_settings[EXTENSION_KEY];
+    debug('migrateSettings: Loading existing settings', { hasSettings: !!extension_settings[EXTENSION_KEY], settings });
+    
     if (settings.api === undefined) settings.api = EXPRESSION_API.local;
     if (!Array.isArray(settings.custom)) settings.custom = [];
     if (settings.fallback_expression === undefined) settings.fallback_expression = DEFAULT_FALLBACK_EXPRESSION;
     if (settings.messagesToAnalyze === undefined) settings.messagesToAnalyze = DEFAULT_MESSAGES_TO_ANALYZE;
     if (settings.allowMultiple === undefined) settings.allowMultiple = true;
     if (settings.rerollIfSame === undefined) settings.rerollIfSame = true;
+    if (settings.enabled === undefined) settings.enabled = true; // Set default for enabled
     if (!settings.persona_settings) settings.persona_settings = {};
     if (settings.position === undefined) settings.position = 'bottom-right';
     if (settings.size === undefined) settings.size = 200;
     if (settings.opacity === undefined) settings.opacity = 100;
+    
+    debug('migrateSettings: Settings migrated', { enabled: settings.enabled, api: settings.api });
     saveSettingsDebounced();
 }
 
@@ -973,7 +979,7 @@ async function setSpriteSlashCommand({ type }, searchTerm) {
 
         const settings = getSettings();
 
-        $('#persona_expression_enabled').prop('checked', settings.enabled ?? true).on('input', function () {
+        $('#persona_expression_enabled').prop('checked', settings.enabled).on('input', function () {
             const s = getSettings();
             s.enabled = !!$(this).prop('checked');
             saveSettingsDebounced();
