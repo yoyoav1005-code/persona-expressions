@@ -1,93 +1,85 @@
-# Person Expression Extension
+# Persona Expressions Extension
 
-A SillyTavern extension that displays persona expressions based on classification data.
+A SillyTavern extension that automatically displays persona expressions based on emotion classification of user messages. Similar to the Character Expressions extension but for user personas.
 
 ## Overview
 
-This extension is similar to the Character Expression extension but works with personas instead of characters. It displays expression images for the currently selected persona based on a local classification source.
+This extension analyzes the user's last N messages (configurable, default 3) using a BERT classification model and automatically displays the corresponding expression sprite for the current persona.
 
 ## Features
 
-- Display persona expressions based on classification data
-- Local classification source (JSON file)
-- Configurable panel position (top-left, top-right, bottom-left, bottom-right)
-- Auto-hide with configurable delay
-- Configurable panel size
-- Show/hide expression label
-- Smooth fade transitions
+- **Automatic Emotion Classification**: Analyzes user messages using local BERT model
+- **Per-Persona Sprites**: Each persona has its own set of expression sprites
+- **Multiple Sprites per Expression**: Support for multiple sprites per emotion with random selection
+- **Re-roll Option**: Automatically pick a different sprite if the same expression repeats
+- **Fallback Expressions**: Set default/fallback expressions when no sprite is found
+- **Custom Expressions**: Add custom emotion labels beyond the default 28
+- **Slash Commands**: `/pe`, `/persona-expression`, `/persona-classify`, `/persona-list`
+- **Drag & Drop**: Repositionable expression panel
 
 ## Installation
 
-1. Copy the `PersonExpressionExtension` folder to your SillyTavern `public/scripts/extensions/` directory
+1. Copy the `persona-expressions` folder to your SillyTavern `public/scripts/extensions/third-party/` directory
 2. Restart SillyTavern or reload the page
-3. Go to Settings > Extensions to configure the extension
+3. Go to Settings > Extensions to enable and configure the extension
 
 ## Usage
 
-1. Place expression images in the `assets/` folder
-2. Edit `person-expressions.json` to map persona IDs to expression images
-3. Enable the extension in Settings > Extensions
-4. Configure the extension settings as desired
+### Creating Persona Sprites
 
-## Configuration
+1. Create a folder in your sprites directory named after your persona with `persona_` prefix
+   - Example: `persona_YourPersonaName`
+2. Add expression images with the naming convention:
+   - `[expression].[ext]` - e.g., `joy.png`, `anger.png`
+   - `[expression]-[index].[ext]` - e.g., `joy-1.png`, `joy-2.png`
+   - `[expression].[suffix].[ext]` - e.g., `joy.happy.png`
 
-The extension can be configured through the Settings menu:
+### Supported Expressions
 
-- **Enable Person Expression**: Toggle the extension on/off
-- **Position**: Set the panel position (top-left, top-right, bottom-left, bottom-right)
-- **Auto Hide**: Enable/disable auto-hide
-- **Auto Hide Delay**: Time in milliseconds before auto-hiding
-- **Width**: Panel width in pixels
-- **Height**: Panel height in pixels
-- **Classification File**: Path to the JSON classification file
-- **Show Label**: Toggle expression label visibility
+The extension supports 28 default emotions:
+admiration, amusement, anger, annoyance, approval, caring, confusion, curiosity, desire, disappointment, disapproval, disgust, embarrassment, excitement, fear, gratitude, grief, joy, love, nervousness, optimism, pride, realization, relief, remorse, sadness, surprise, neutral
 
-## Classification File Format
+### Slash Commands
 
-The classification file (`person-expressions.json` by default) should be a JSON object where keys are persona IDs and values are arrays of expression image paths:
+| Command | Aliases | Description |
+|---------|---------|-------------|
+| `/persona-expression` | `/pe`, `/persona-emote` | Set expression for current persona |
+| `/persona-list` | `/persona-expressions` | List available expressions |
+| `/persona-classify` | | Classify text and return emotion |
 
-```json
-{
-    "persona_id_1": [
-        "assets/expression1.png",
-        "assets/expression2.png"
-    ],
-    "persona_id_2": [
-        "assets/expression3.png"
-    ]
-}
-```
+### Settings
+
+- **Enable Persona Expressions**: Toggle the extension on/off
+- **Messages to Analyze**: Number of recent user messages to classify (1-10)
+- **Classifier API**: Local BERT, Extras (deprecated), or None
+- **Allow Multiple Sprites**: Allow multiple sprites per expression
+- **Re-roll if Same**: Pick different sprite if same expression repeats
+- **Default/Fallback Expression**: Expression to show when no sprite found
 
 ## File Structure
 
 ```
-PersonExpressionExtension/
-├── manifest.json          # Extension metadata
-├── index.js              # Main extension code
-├── style.css             # Extension styles
-├── settings.html         # Settings UI
-├── person-expressions.json # Classification data
-└── assets/               # Expression images
-    └── placeholder.png   # Default placeholder image
+persona-expressions/
+├── manifest.json           # Extension metadata
+├── index.js               # Main extension code
+├── style.css              # Extension styles
+├── settings.html          # Settings UI
+├── templates/
+│   └── list-item.html     # Sprite list item template
+└── README.md              # This file
 ```
 
-## Development
+## Sprite Storage
 
-### Building
-
-No build process required - the extension uses vanilla JavaScript and CSS.
-
-### Testing
-
-1. Load the extension in SillyTavern
-2. Check the browser console for any errors
-3. Test with different persona selections
-4. Verify settings persistence
+Sprites are stored using the existing SillyTavern sprite API with persona prefix:
+- Folder naming: `persona_{PersonaName}`
+- Example: `persona_Blaze/joy.png`
 
 ## Requirements
 
-- SillyTavern version: 0.1.70 or higher
+- SillyTavern version: 1.0.0 or higher
 - Browser: Modern browser with ES6+ support
+- Optional: Local BERT classification module for auto-classification
 
 ## License
 
@@ -95,9 +87,9 @@ MIT License
 
 ## Author
 
-PersonExpressionTeam
+SillyTavern User
 
 ## Acknowledgments
 
-- Inspired by the Character Expression extension
+- Based on the Character Expressions extension by Cohee#1207
 - Built for the SillyTavern community

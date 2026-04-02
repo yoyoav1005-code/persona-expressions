@@ -1,55 +1,219 @@
-/* Person Expression Extension Styles */
-
-#person_expression_panel {
+#persona_expression-wrapper {
     position: fixed;
-    z-index: 10000;
+    display: flex;
+    height: calc(100vh - var(--topBarBlockSize));
+    width: 100vw;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    z-index: 3;
 }
 
-#person_expression_panel.hidden {
-    opacity: 0;
+.persona_expression-holder {
+    --persona-expression-size: 200px;
+    position: absolute;
+    padding: 0;
+    margin: 10px;
+    filter: drop-shadow(2px 2px 2px #51515199);
+    pointer-events: auto;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
 }
 
-#person_expression_image {
-    width: 100%;
-    height: 100%;
+/* Position classes */
+.persona_expression-holder.position-top-left {
+    top: 0;
+    left: 0;
+    right: auto;
+    bottom: auto;
+}
+
+.persona_expression-holder.position-top-right {
+    top: 0;
+    right: 0;
+    left: auto;
+    bottom: auto;
+}
+
+.persona_expression-holder.position-bottom-left {
+    bottom: 0;
+    left: 0;
+    top: auto;
+    right: auto;
+}
+
+.persona_expression-holder.position-bottom-right {
+    bottom: 0;
+    right: 0;
+    top: auto;
+    left: auto;
+}
+
+/* Default position */
+.persona_expression-holder {
+    bottom: 0;
+    right: 0;
+}
+
+img.persona_expression {
+    min-width: 100px;
+    min-height: 100px;
+    max-height: 40vh;
+    max-width: 40vh;
+    top: 0;
+    bottom: 0;
+    padding: 0;
+    vertical-align: bottom;
     object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    width: var(--persona-expression-size);
+    height: auto;
+    aspect-ratio: auto;
 }
 
-#person_expression_label {
+img.persona_expression[src=""] {
+    visibility: hidden;
+}
+
+img.persona_expression.default {
+    vertical-align: middle;
+    max-height: 120px;
+    object-fit: contain !important;
+    margin-top: 50px;
+}
+
+.persona_expression-clone {
+    position: absolute;
+}
+
+#persona_no_chat_expressions {
+    text-align: center;
+    margin: 10px 0;
+    font-weight: bold;
+    opacity: 0.8;
+}
+
+#persona_image_list_header_name {
+    font-weight: 400;
+}
+
+.persona_expression_list_item {
+    position: relative;
+    max-width: 20%;
+    min-width: 100px;
+    max-height: 200px;
+    background-color: #515151b0;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.persona_expression_list_image_container {
+    overflow: hidden;
+}
+
+.persona_expression_list_title {
     position: absolute;
     bottom: 0;
     left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 4px 8px;
-    font-size: 12px;
     text-align: center;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-    pointer-events: auto;
+    font-weight: 600;
+    background-color: #000000a8;
+    width: 100%;
+    height: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    line-height: 1;
 }
 
-.person_expression_position-top-left {
-    top: 20px;
-    left: 20px;
+.persona_expression_list_custom {
+    font-size: 0.66rem;
 }
 
-.person_expression_position-top-right {
-    top: 20px;
-    right: 20px;
+.persona_expression_list_buttons {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem;
 }
 
-.person_expression_position-bottom-left {
-    bottom: 20px;
-    left: 20px;
+.menu_button.persona_expression_list_delete,
+.menu_button.persona_expression_list_upload {
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
-.person_expression_position-bottom-right {
-    bottom: 20px;
-    right: 20px;
+.persona_expression_list_image {
+    max-width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#persona_image_list {
+    display: flex;
+    flex-direction: row;
+    column-gap: 1rem;
+    margin: 1rem;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    row-gap: 1rem;
+}
+
+#persona_image_list .persona_expression_list_item[data-expression-type="success"] .persona_expression_list_title {
+    color: green;
+}
+
+#persona_image_list .persona_expression_list_item[data-expression-type="additional"] .persona_expression_list_title {
+    color: darkolivegreen;
+}
+
+#persona_image_list .persona_expression_list_item[data-expression-type="additional"] .persona_expression_list_title::before {
+    content: '+';
+    position: absolute;
+    top: -7px;
+    left: -9px;
+    font-size: 14px;
+    color: darkolivegreen;
+}
+
+#persona_image_list .persona_expression_list_item[data-expression-type="failure"] .persona_expression_list_title {
+    color: red;
+}
+
+.persona_expression_settings label {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    margin-left: 0px;
+}
+
+.persona_expression_settings label input {
+    margin-left: 0px !important;
+}
+
+.persona_expression_buttons .menu_button {
+    width: fit-content;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    flex-direction: row;
+}
+
+#extensions_settings2:has(#persona_expressions_allow_multiple:not(:checked)) #persona_image_list .persona_expression_list_item[data-expression-type="additional"],
+#extensions_settings2:has(#persona_expressions_allow_multiple:not(:checked)) label[for="persona_expressions_reroll_if_same"] {
+    opacity: 0.3;
+    transition: opacity var(--animation-duration) ease;
+}
+
+#extensions_settings2:has(#persona_expressions_allow_multiple:not(:checked)) #persona_image_list .persona_expression_list_item[data-expression-type="additional"]:hover,
+#extensions_settings2:has(#persona_expressions_allow_multiple:not(:checked)) #persona_image_list .persona_expression_list_item[data-expression-type="additional"]:focus {
+    opacity: unset;
 }

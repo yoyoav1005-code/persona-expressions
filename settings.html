@@ -1,76 +1,128 @@
-<div id="person_expression_settings" class="inline_drawer">
-    <details open>
-        <summary data-i18n="Person Expression">Person Expression</summary>
-        <div class="settings_block">
-            <div class="settings_row">
-                <div class="settings_label">
-                    <label for="person_expression_enabled" data-i18n="Enable Person Expression">Enable Person Expression</label>
-                </div>
-                <div class="settings_input">
-                    <input type="checkbox" id="person_expression_enabled">
+<div class="persona_expression_settings">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b data-i18n="Persona Expressions">Persona Expressions</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+
+        <div class="inline-drawer-content">
+            <label class="checkbox_label" for="persona_expression_enabled">
+                <input id="persona_expression_enabled" type="checkbox">
+                <span data-i18n="Enable persona expressions">Enable persona expressions</span>
+            </label>
+
+            <div class="m-b-1 m-t-1">
+                <label for="persona_expression_messages_count" data-i18n="Messages to analyze">Messages to analyze</label>
+                <small data-i18n="Number of recent user messages to analyze for classification.">Number of recent user messages to analyze for classification.</small>
+                <select id="persona_expression_messages_count" class="flex1 margin0">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
+
+            <div class="persona_expression_api_block m-b-1 m-t-1">
+                <label for="persona_expression_api" data-i18n="Classifier API">Classifier API</label>
+                <small data-i18n="Select the API for classifying expressions.">Select the API for classifying expressions.</small>
+                <select id="persona_expression_api" class="flex1 margin0">
+                    <option value="99" data-i18n="[ None ]">[ None ]</option>
+                    <option value="0" data-i18n="Local">Local</option>
+                    <option value="1" data-i18n="Extras (deprecated)">Extras (deprecated)</option>
+                </select>
+            </div>
+
+            <div class="persona_expressions_options m-b-1 m-t-1">
+                <label class="checkbox_label" for="persona_expressions_allow_multiple">
+                    <input id="persona_expressions_allow_multiple" type="checkbox">
+                    <span data-i18n="Allow multiple sprites per expression">Allow multiple sprites per expression</span>
+                </label>
+                <label class="checkbox_label" for="persona_expressions_reroll_if_same">
+                    <input id="persona_expressions_reroll_if_same" type="checkbox">
+                    <span data-i18n="Re-roll if same sprite is used again">Re-roll if same sprite is used again</span>
+                </label>
+            </div>
+
+            <div class="persona_expression_fallback_block m-b-1 m-t-1">
+                <label for="persona_expression_fallback" data-i18n="Default / Fallback Expression">Default / Fallback Expression</label>
+                <small data-i18n="Set the default expression when no sprite is found.">Set the default expression when no sprite is found.</small>
+                <select id="persona_expression_fallback" class="flex1 margin0"></select>
+            </div>
+
+            <div class="persona_expression_ui_block m-b-1 m-t-1">
+                <label for="persona_expression_position" data-i18n="Sprite Position">Sprite Position</label>
+                <select id="persona_expression_position" class="flex1 margin0">
+                    <option value="top-left">Top Left</option>
+                    <option value="top-right">Top Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                    <option value="bottom-right" selected>Bottom Right</option>
+                </select>
+            </div>
+
+            <div class="persona_expression_ui_block m-b-1 m-t-1">
+                <label for="persona_expression_size" data-i18n="Sprite Size">Sprite Size (px)</label>
+                <input type="range" id="persona_expression_size" min="50" max="400" value="200" class="flex1 margin0">
+                <small><span id="persona_expression_size_value">200</span>px</small>
+            </div>
+
+            <div class="persona_expression_ui_block m-b-1 m-t-1">
+                <label for="persona_expression_opacity" data-i18n="Sprite Opacity">Sprite Opacity</label>
+                <input type="range" id="persona_expression_opacity" min="10" max="100" value="100" class="flex1 margin0">
+                <small><span id="persona_expression_opacity_value">100</span>%</small>
+            </div>
+
+            <div class="persona_expression_custom_block m-b-1 m-t-1">
+                <label for="persona_expression_custom" data-i18n="Custom Expressions">Custom Expressions</label>
+                <small data-i18n="Can be set manually or with /pe slash command.">Can be set manually or with /pe slash command.</small>
+                <div class="flex-container">
+                    <select id="persona_expression_custom" class="flex1 margin0"></select>
+                    <i id="persona_expression_custom_add" class="menu_button fa-solid fa-plus margin0" title="Add"></i>
+                    <i id="persona_expression_custom_remove" class="menu_button fa-solid fa-xmark margin0" title="Remove"></i>
                 </div>
             </div>
-            <div class="settings_row">
-                <div class="settings_label">
-                    <label for="person_expression_position" data-i18n="Position">Position</label>
-                </div>
-                <div class="settings_input">
-                    <select id="person_expression_position">
-                        <option value="top-left" data-i18n="Top Left">Top Left</option>
-                        <option value="top-right" data-i18n="Top Right">Top Right</option>
-                        <option value="bottom-left" data-i18n="Bottom Left">Bottom Left</option>
-                        <option value="bottom-right" data-i18n="Bottom Right">Bottom Right</option>
-                    </select>
-                </div>
+
+            <div id="persona_no_chat_expressions">
+                <span data-i18n="Switch to a persona to see expressions.">Switch to a persona to see expressions.</span>
+                <br>
+                <small id="persona_current_name"></small>
             </div>
-            <div class="settings_row">
-                <div class="settings_label">
-                    <label for="person_expression_autohide" data-i18n="Auto Hide">Auto Hide</label>
+
+            <div id="persona_open_chat_expressions">
+                <div class="offline_mode">
+                    <small data-i18n="You are in offline mode. Click on an image below to set the expression.">You are in offline mode. Click on an image below to set the expression.</small>
                 </div>
-                <div class="settings_input">
-                    <input type="checkbox" id="person_expression_autohide">
+
+                <div class="persona_expression_buttons flex-container spaceEvenly">
+                    <div id="persona_expression_upload_pack_button" class="menu_button">
+                        <i class="fa-solid fa-file-zipper"></i>
+                        <span data-i18n="Upload sprite pack (ZIP)">Upload sprite pack (ZIP)</span>
+                    </div>
                 </div>
-            </div>
-            <div class="settings_row">
-                <div class="settings_label">
-                    <label for="person_expression_delay" data-i18n="Auto Hide Delay (ms)">Auto Hide Delay (ms)</label>
-                </div>
-                <div class="settings_input">
-                    <input type="number" id="person_expression_delay" value="3000" min="0" step="100">
-                </div>
-            </div>
-            <div class="settings_row">
-                <div class="settings_label">
-                    <label for="person_expression_width" data-i18n="Width (px)">Width (px)</label>
-                </div>
-                <div class="settings_input">
-                    <input type="number" id="person_expression_width" value="200" min="50" max="500" step="10">
-                </div>
-            </div>
-            <div class="settings_row">
-                <div class="settings_label">
-                    <label for="person_expression_height" data-i18n="Height (px)">Height (px)</label>
-                </div>
-                <div class="settings_input">
-                    <input type="number" id="person_expression_height" value="200" min="50" max="500" step="10">
-                </div>
-            </div>
-            <div class="settings_row">
-                <div class="settings_label">
-                    <label for="person_expression_classification_file" data-i18n="Classification File">Classification File</label>
-                </div>
-                <div class="settings_input">
-                    <input type="text" id="person_expression_classification_file" value="person-expressions.json" placeholder="person-expressions.json">
-                </div>
-            </div>
-            <div class="settings_row">
-                <div class="settings_label">
-                    <label for="person_expression_show_label" data-i18n="Show Label">Show Label</label>
-                </div>
-                <div class="settings_input">
-                    <input type="checkbox" id="person_expression_show_label">
-                </div>
+
+                <p class="hint">
+                    <b data-i18n="Hint:">Hint:</b>
+                    <i>
+                        <span data-i18n="Create folders in the sprites directory and name them as 'persona_YourPersonaName'.">Create folders in the sprites directory and name them as 'persona_YourPersonaName'.</span>
+                        <span data-i18n="Put images with expressions there. File names should follow the pattern:">Put images with expressions there. File names should follow the pattern: </span>
+                        <tt data-i18n="expression_label_pattern">[expression_label].[image_format]</tt>
+                    </i>
+                </p>
+                <p>
+                    <i>
+                        <span>Examples: </span><tt>joy.png</tt>, <tt>anger-1.png</tt>, <tt>neutral.happy.png</tt>
+                    </i>
+                </p>
+
+                <h3 id="persona_image_list_header">
+                    <strong data-i18n="Sprite set:">Sprite set:</strong>&nbsp;<span id="persona_image_list_header_name"></span>
+                </h3>
+                <div id="persona_image_list"></div>
             </div>
         </div>
-    </details>
+    </div>
+    <form>
+        <input type="file" id="persona_expression_upload_pack" name="persona_expression_upload_pack" accept="application/zip" hidden>
+        <input type="file" id="persona_expression_upload" name="persona_expression_upload" accept="image/*" hidden>
+    </form>
 </div>
