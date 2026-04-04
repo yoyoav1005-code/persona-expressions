@@ -17,7 +17,7 @@ export { MODULE_NAME };
 // ============================================
 // DEBUGGING CONFIGURATION
 // ============================================
-const DEBUG = false; // Set to false in production
+const DEBUG = true; // Set to false in production
 
 function debug(...args) {
     if (DEBUG) console.log('[Persona Expressions]', ...args);
